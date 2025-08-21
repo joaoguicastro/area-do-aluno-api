@@ -1,0 +1,18 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: bitnami/postgresql:16
+    container_name: pg-areadoaluno
+    restart: unless-stopped
+    environment:
+      - POSTGRESQL_USERNAME=postgres
+      - POSTGRESQL_PASSWORD=postgres
+      - POSTGRESQL_DATABASE=areadoaluno
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/bitnami/postgresql
+
+volumes:
+  pgdata:

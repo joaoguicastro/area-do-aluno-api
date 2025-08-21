@@ -1,0 +1,60 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  MASTER
+  ADMIN
+  OPERADOR
+  PROFESSOR
+}
+
+model Funcionario {
+  id        String   @id @default(cuid())
+  nome      String
+  email     String   @unique
+  senhaHash String
+  role      Role     @default(ADMIN)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum Modality {
+  ONLINE
+  PRESENCIAL
+}
+
+model Curso {
+  id           String   @id @default(cuid())
+  nome         String
+  modality     Modality
+  duracaoHoras Int?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  videoAulas VideoAula[]
+}
+
+model VideoAula {
+  id         String   @id @default(cuid())
+  cursoId    String
+  titulo     String
+  descricao  String?
+  urlVideo   String
+  ordem      Int?
+  duracaoMin Int?
+  createdAt  DateTime @default(now())
+
+  curso Curso @relation(fields: [cursoId], references: [id], onDelete: Cascade)
+}
