@@ -44,6 +44,10 @@ model Curso {
   updatedAt    DateTime @updatedAt
 
   videoAulas VideoAula[]
+
+  Turma Turma[]
+
+  Matricula Matricula[]
 }
 
 model VideoAula {
@@ -57,4 +61,81 @@ model VideoAula {
   createdAt  DateTime @default(now())
 
   curso Curso @relation(fields: [cursoId], references: [id], onDelete: Cascade)
+}
+
+model Turma {
+  id         String   @id @default(cuid())
+  cursoId    String
+  nome       String?
+  capacidade Int?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  curso     Curso          @relation(fields: [cursoId], references: [id], onDelete: Cascade)
+  horarios  TurmaHorario[]
+  Matricula Matricula[]
+
+  @@index([cursoId])
+}
+
+model TurmaHorario {
+  id        String @id @default(cuid())
+  turmaId   String
+  diaSemana Int
+  inicio    String
+  fim       String
+
+  turma Turma @relation(fields: [turmaId], references: [id], onDelete: Cascade)
+
+  @@index([turmaId])
+}
+
+enum MatriculaStatus {
+  ATIVA
+  TRANCADA
+  CANCELADA
+  CONCLUIDA
+}
+
+model Aluno {
+  id                  String   @id @default(cuid())
+  nome                String
+  cpfAluno            String   @unique
+  dataNascimentoAluno DateTime
+
+  nomeResponsavel           String
+  cpfResponsavel            String
+  dataNascimentoResponsavel DateTime
+
+  rua    String
+  numero String
+  bairro String
+  cidade String
+
+  telefone String?
+  email    String?
+  fotoUrl  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  matriculas Matricula[]
+}
+
+model Matricula {
+  id         String          @id @default(cuid())
+  alunoId    String
+  cursoId    String
+  turmaId    String?
+  status     MatriculaStatus @default(ATIVA)
+  dataInicio DateTime        @default(now())
+  dataFim    DateTime?
+
+  aluno Aluno  @relation(fields: [alunoId], references: [id], onDelete: Cascade)
+  curso Curso  @relation(fields: [cursoId], references: [id])
+  turma Turma? @relation(fields: [turmaId], references: [id], onDelete: SetNull)
+
+  @@index([alunoId])
+  @@index([cursoId])
+  @@index([turmaId])
 }

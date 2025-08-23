@@ -4,6 +4,8 @@ import jwt from '@fastify/jwt';
 import { env } from './env/index.js';
 import { errorHandler } from './http/errors/error-handler.js';
 import { authRoutes } from './http/routes/auth.routes.js';
+import { cursosRoutes } from './http/routes/cursos.routes.js';
+import { turmasRoutes } from './http/routes/turmas.routes.js';
 
 export const app = Fastify({ logger: true });
 
@@ -15,5 +17,7 @@ app.get('/', async () => {
 });
 
 app.register(authRoutes);
+app.register(cursosRoutes);
+app.register(turmasRoutes);
 
 app.setErrorHandler(errorHandler);
