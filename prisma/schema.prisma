@@ -48,6 +48,10 @@ model Curso {
   Turma Turma[]
 
   Matricula Matricula[]
+
+  Exercicio Exercicio[]
+
+  Prova Prova[]
 }
 
 model VideoAula {
@@ -120,6 +124,10 @@ model Aluno {
   updatedAt DateTime @updatedAt
 
   matriculas Matricula[]
+
+  EntregaExercicio EntregaExercicio[]
+
+  ProvaSubmissao ProvaSubmissao[]
 }
 
 model Matricula {
@@ -138,4 +146,127 @@ model Matricula {
   @@index([alunoId])
   @@index([cursoId])
   @@index([turmaId])
+}
+
+model Exercicio {
+  id          String    @id @default(cuid())
+  cursoId     String
+  titulo      String
+  descricao   String?
+  dataEntrega DateTime?
+  publicado   Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+
+  curso    Curso              @relation(fields: [cursoId], references: [id], onDelete: Cascade)
+  entregas EntregaExercicio[]
+
+  @@index([cursoId])
+}
+
+model EntregaExercicio {
+  id          String   @id @default(cuid())
+  exercicioId String
+  alunoId     String
+  texto       String?
+  arquivoUrl  String?
+  enviadoEm   DateTime @default(now())
+  nota        Float?
+
+  exercicio Exercicio @relation(fields: [exercicioId], references: [id], onDelete: Cascade)
+  aluno     Aluno     @relation(fields: [alunoId], references: [id], onDelete: Cascade)
+
+  @@unique([exercicioId, alunoId])
+  @@index([alunoId])
+}
+
+enum QuestaoTipo {
+  MULTIPLA_ESCOLHA
+  DISSERTATIVA
+}
+
+enum ProvaStatusSubmissao {
+  EM_ANDAMENTO
+  ENVIADA
+  CORRIGIDA
+}
+
+model Prova {
+  id         String    @id @default(cuid())
+  cursoId    String
+  titulo     String
+  descricao  String?
+  inicioEm   DateTime?
+  fimEm      DateTime?
+  duracaoMin Int?
+  publicado  Boolean   @default(false)
+  createdAt  DateTime  @default(now())
+
+  curso       Curso            @relation(fields: [cursoId], references: [id], onDelete: Cascade)
+  questoes    ProvaQuestao[]
+  submissões ProvaSubmissao[]
+
+  @@index([cursoId])
+}
+
+model ProvaQuestao {
+  id        String      @id @default(cuid())
+  provaId   String
+  ordem     Int?
+  tipo      QuestaoTipo
+  enunciado String
+  valor     Float?
+
+  prova     Prova               @relation(fields: [provaId], references: [id], onDelete: Cascade)
+  opcoes    ProvaQuestaoOpcao[]
+  respostas ProvaResposta[]
+
+  @@index([provaId])
+}
+
+model ProvaQuestaoOpcao {
+  id        String  @id @default(cuid())
+  questaoId String
+  texto     String
+  correta   Boolean @default(false)
+  ordem     Int?
+
+  questao       ProvaQuestao    @relation(fields: [questaoId], references: [id], onDelete: Cascade)
+  ProvaResposta ProvaResposta[]
+
+  @@index([questaoId])
+}
+
+model ProvaSubmissao {
+  id           String               @id @default(cuid())
+  provaId      String
+  alunoId      String
+  iniciadoEm   DateTime             @default(now())
+  finalizadoEm DateTime?
+  notaTotal    Float?
+  status       ProvaStatusSubmissao @default(EM_ANDAMENTO)
+
+  prova     Prova           @relation(fields: [provaId], references: [id], onDelete: Cascade)
+  aluno     Aluno           @relation(fields: [alunoId], references: [id], onDelete: Cascade)
+  respostas ProvaResposta[]
+
+  @@unique([provaId, alunoId])
+  @@index([alunoId])
+}
+
+model ProvaResposta {
+  id          String   @id @default(cuid())
+  submissaoId String
+  questaoId   String
+  opcaoId     String?
+  respostaTxt String?
+  correta     Boolean?
+  nota        Float?
+
+  submissao ProvaSubmissao     @relation(fields: [submissaoId], references: [id], onDelete: Cascade)
+  questao   ProvaQuestao       @relation(fields: [questaoId], references: [id], onDelete: Cascade)
+  opcao     ProvaQuestaoOpcao? @relation(fields: [opcaoId], references: [id])
+
+  @@unique([submissaoId, questaoId])
+  @@index([questaoId])
+  @@index([opcaoId])
 }
