@@ -52,6 +52,8 @@ model Curso {
   Exercicio Exercicio[]
 
   Prova Prova[]
+
+  VideoAulaProgresso VideoAulaProgresso[]
 }
 
 model VideoAula {
@@ -65,6 +67,8 @@ model VideoAula {
   createdAt  DateTime @default(now())
 
   curso Curso @relation(fields: [cursoId], references: [id], onDelete: Cascade)
+
+  VideoAulaProgresso VideoAulaProgresso[]
 }
 
 model Turma {
@@ -105,6 +109,7 @@ model Aluno {
   id                  String   @id @default(cuid())
   nome                String
   cpfAluno            String   @unique
+  matricula           String   @unique
   dataNascimentoAluno DateTime
 
   nomeResponsavel           String
@@ -130,16 +135,19 @@ model Aluno {
   ProvaSubmissao ProvaSubmissao[]
 
   acesso AlunoAcesso?
+
+  VideoAulaProgresso VideoAulaProgresso[]
 }
 
 model AlunoAcesso {
   id          String    @id @default(cuid())
-  email       String    @unique
   senhaHash   String
   isActive    Boolean   @default(true)
   lastLoginAt DateTime?
   alunoId     String    @unique
   aluno       Aluno     @relation(fields: [alunoId], references: [id], onDelete: Cascade)
+
+  @@index([alunoId])
 }
 
 model Matricula {
@@ -152,8 +160,8 @@ model Matricula {
   dataFim    DateTime?
 
   aluno Aluno  @relation(fields: [alunoId], references: [id], onDelete: Cascade)
-  curso Curso  @relation(fields: [cursoId], references: [id])
-  turma Turma? @relation(fields: [turmaId], references: [id], onDelete: SetNull)
+  curso Curso  @relation(fields: [cursoId], references: [id], onDelete: Cascade)
+  turma Turma? @relation(fields: [turmaId], references: [id], onDelete: Cascade)
 
   @@index([alunoId])
   @@index([cursoId])
@@ -282,3 +290,23 @@ model ProvaResposta {
   @@index([questaoId])
   @@index([opcaoId])
 }
+
+model VideoAulaProgresso {
+  id          String    @id @default(cuid())
+  alunoId     String
+  cursoId     String
+  videoAulaId String
+  positionSec Int       @default(0)
+  completed   Boolean   @default(false)
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  aluno     Aluno     @relation(fields: [alunoId], references: [id], onDelete: Cascade)
+  curso     Curso     @relation(fields: [cursoId], references: [id], onDelete: Cascade)
+  videoAula VideoAula @relation(fields: [videoAulaId], references: [id], onDelete: Cascade)
+
+  @@unique([alunoId, videoAulaId])
+  @@index([alunoId, cursoId])
+}
+

@@ -25,6 +25,8 @@ export class PrismaAlunosRepository implements AlunosRepository {
         telefone: data.telefone ?? null,
         email: data.email ?? null,
         fotoUrl: data.fotoUrl ?? null,
+
+        matricula: data.matricula,
       },
     });
     return this.map(r);
@@ -101,5 +103,6 @@ export class PrismaAlunosRepository implements AlunosRepository {
     fotoUrl: r.fotoUrl,
     createdAt: r.createdAt,
     updatedAt: r.updatedAt,
+    matricula: r.matricula,
   });
 }

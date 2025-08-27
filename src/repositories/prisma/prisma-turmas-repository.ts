@@ -27,6 +27,11 @@ export class PrismaTurmasRepository implements TurmasRepository {
     return r ? this.mapTurma(r) : null;
   }
 
+  async findByIdCurso(cursoId: string): Promise<Turma | null> {
+    const r = await prisma.turma.findFirst({ where: { cursoId } });
+    return r ? this.mapTurma(r) : null;
+  }
+
   async list(params: ListTurmasParams): Promise<{ data: Turma[]; total: number }> {
     const { cursoId, q, page = 1, perPage = 10 } = params ?? {};
     const where: Prisma.TurmaWhereInput = {};

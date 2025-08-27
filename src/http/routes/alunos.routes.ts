@@ -6,6 +6,7 @@ import { listAlunosController } from '../controllers/aluno/list-alunos.controlle
 import { getAlunoController } from '../controllers/aluno/get-aluno.controller.js';
 import { updateAlunoController } from '../controllers/aluno/update-aluno.controller.js';
 import { deleteAlunoController } from '../controllers/aluno/delete-aluno.controller.js';
+import { alunoMeController } from '../controllers/aluno/me.js';
 
 export async function alunosRoutes(app: FastifyInstance) {
   app.addHook('onRequest', ensureAuth);
@@ -15,4 +16,5 @@ export async function alunosRoutes(app: FastifyInstance) {
   app.get('/alunos/:id', getAlunoController);
   app.patch('/alunos/:id', updateAlunoController);
   app.delete('/alunos/:id', deleteAlunoController);
+  app.get('/aluno/me', alunoMeController);
 }

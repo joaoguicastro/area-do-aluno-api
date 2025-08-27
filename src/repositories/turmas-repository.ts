@@ -42,6 +42,7 @@ export interface ListTurmasParams {
 export interface TurmasRepository {
   create(data: CreateTurmaInput): Promise<Turma>;
   findById(id: string): Promise<Turma | null>;
+  findByIdCurso(cursoId: string): Promise<Turma | null>;
   list(params: ListTurmasParams): Promise<{ data: Turma[]; total: number }>;
   update(id: string, data: UpdateTurmaInput): Promise<Turma>;
   delete(id: string): Promise<void>;

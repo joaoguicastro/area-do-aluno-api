@@ -2,37 +2,45 @@ import { compare } from 'bcryptjs';
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
-type Input = { email: string; senha: string; };
+type Input = { cpfOrMatricula: string; senha: string };
 type Output = {
-  aluno: { id: string; nome: string; email?: string | null; };
+  aluno: { id: string; nome: string; email?: string | null; matricula: string };
   acessoId: string;
 };
 
+function normalizarCPF(cpf: string) {
+  return (cpf || '').replace(/\D/g, '');
+}
+
 export class AuthenticateAlunoUseCase {
-  async execute({ email, senha }: Input): Promise<Output> {
-    const acesso = await prisma.alunoAcesso.findUnique({
-      where: { email },
-      include: { aluno: true },
+  async execute({ cpfOrMatricula, senha }: Input): Promise<Output> {
+    const talvezCpf = normalizarCPF(cpfOrMatricula);
+    const ehCpf = /^\d{11}$/.test(talvezCpf);
+
+    const aluno = await prisma.aluno.findFirst({
+      where: ehCpf ? { cpfAluno: talvezCpf } : { matricula: cpfOrMatricula },
+      include: { acesso: true },
     });
 
-    if (!acesso || !acesso.isActive) {
+    if (!aluno || !aluno.acesso || !aluno.acesso.isActive) {
       throw new Error('Credenciais inválidas.');
     }
 
-    const ok = await compare(senha, acesso.senhaHash);
+    const ok = await compare(senha, aluno.acesso.senhaHash);
     if (!ok) throw new Error('Credenciais inválidas.');
 
     await prisma.alunoAcesso.update({
-      where: { id: acesso.id },
+      where: { id: aluno.acesso.id },
       data: { lastLoginAt: new Date() },
     });
 
     return {
-      acessoId: acesso.id,
+      acessoId: aluno.acesso.id,
       aluno: {
-        id: acesso.aluno.id,
-        nome: acesso.aluno.nome,
-        email: acesso.aluno.email ?? null,
+        id: aluno.id,
+        nome: aluno.nome,
+        email: aluno.email ?? null,
+        matricula: aluno.matricula,
       },
     };
   }

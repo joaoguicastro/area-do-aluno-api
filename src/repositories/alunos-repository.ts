@@ -19,6 +19,8 @@ export interface Aluno {
 
   createdAt: Date;
   updatedAt: Date;
+
+  matricula: string;
 }
 
 export interface CreateAlunoInput {
@@ -38,6 +40,7 @@ export interface CreateAlunoInput {
   telefone?: string | null;
   email?: string | null;
   fotoUrl?: string | null;
+  matricula: string;
 }
 
 export interface UpdateAlunoInput {

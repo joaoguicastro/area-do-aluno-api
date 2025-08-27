@@ -2,24 +2,55 @@ import { FastifyReply, FastifyRequest } from 'fastify';
 import { z } from 'zod';
 import { PrismaUsersRepository } from '../../../repositories/prisma/prisma-users-repository.js';
 import { AuthenticateUserUseCase } from '../../../use-cases/authenticate-user.js';
+import { AuthenticateAlunoUseCase } from '../../../use-cases/authenticate-aluno.js';
+
+const adminSchema = z.object({
+  email: z.string().email(),
+  senha: z.string().min(6),
+});
+
+const alunoSchema = z.object({
+  cpfOrMatricula: z.string().min(4),
+  senha: z.string().min(6),
+});
+
+const schema = z.union([adminSchema, alunoSchema]);
 
 export async function loginController(req: FastifyRequest, reply: FastifyReply) {
-  const schema = z.object({
-    email: z.string().email(),
-    senha: z.string().min(6),
-  });
+  const body = schema.parse(req.body);
 
-  const { email, senha } = schema.parse(req.body);
+  if ('email' in body) {
+    const { email, senha } = body;
 
-  const usersRepo = new PrismaUsersRepository();
-  const useCase = new AuthenticateUserUseCase(usersRepo);
+    const usersRepo = new PrismaUsersRepository();
+    const authAdmin = new AuthenticateUserUseCase(usersRepo);
+    const { user } = await authAdmin.execute({ email, senha });
 
-  const { user } = await useCase.execute({ email, senha });
+    const token = await reply.jwtSign(
+      { sub: user.id, role: user.role, email: user.email },
+      { expiresIn: '7d' }
+    );
+
+    return reply.send({
+      token,
+      role: user.role,
+      user: { id: user.id, nome: user.nome, email: user.email },
+    });
+  }
+
+  const { cpfOrMatricula, senha } = body;
+
+  const authAluno = new AuthenticateAlunoUseCase();
+  const { aluno } = await authAluno.execute({ cpfOrMatricula, senha });
 
   const token = await reply.jwtSign(
-    { sub: user.id, role: user.role, email: user.email },
+    { sub: aluno.id, role: 'aluno' },
     { expiresIn: '7d' }
   );
 
-  return reply.send({ token, user: { id: user.id, nome: user.nome, role: user.role } });
+  return reply.send({
+    token,
+    role: 'aluno',
+    aluno: { id: aluno.id, nome: aluno.nome, matricula: aluno.matricula },
+  });
 }

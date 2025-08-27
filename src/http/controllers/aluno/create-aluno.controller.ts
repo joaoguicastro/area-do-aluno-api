@@ -2,7 +2,6 @@ import { FastifyReply, FastifyRequest } from 'fastify';
 import { z } from 'zod';
 import { PrismaAlunosRepository } from '../../../repositories/prisma/prisma-alunos-repository.js';
 import { CreateAlunoUseCase } from '../../../use-cases/aluno/create-aluno.js';
-import type { CreateAlunoInput } from '../../../repositories/alunos-repository.js';
 
 export async function createAlunoController(req: FastifyRequest, reply: FastifyReply) {
   const bodySchema = z.object({
@@ -22,32 +21,49 @@ export async function createAlunoController(req: FastifyRequest, reply: FastifyR
     telefone: z.string().optional(),
     email: z.string().email().optional(),
     fotoUrl: z.string().url().optional(),
+
+    // NOVOS CAMPOS
+    senha: z.string().min(6),
+    prefixoMatricula: z.string().min(2).max(6).optional(), // ex.: 'INF' ou código da unidade
   });
 
   const data = bodySchema.parse(req.body);
 
-  const input: CreateAlunoInput = {
-    nome: data.nome,
-    cpfAluno: data.cpfAluno,
-    dataNascimentoAluno: data.dataNascimentoAluno,
-
-    nomeResponsavel: data.nomeResponsavel,
-    cpfResponsavel: data.cpfResponsavel,
-    dataNascimentoResponsavel: data.dataNascimentoResponsavel,
-
-    rua: data.rua,
-    numero: data.numero,
-    bairro: data.bairro,
-    cidade: data.cidade,
-
-    telefone: data.telefone ?? null,
-    email: data.email ?? null,
-    fotoUrl: data.fotoUrl ?? null,
-  };
-
   const repo = new PrismaAlunosRepository();
   const useCase = new CreateAlunoUseCase(repo);
 
-  const { aluno } = await useCase.execute(input);
-  return reply.status(201).send({ aluno });
+  const { aluno } = await useCase.execute({
+    aluno: {
+      nome: data.nome,
+      cpfAluno: data.cpfAluno,
+      dataNascimentoAluno: data.dataNascimentoAluno,
+
+      nomeResponsavel: data.nomeResponsavel,
+      cpfResponsavel: data.cpfResponsavel,
+      dataNascimentoResponsavel: data.dataNascimentoResponsavel,
+
+      rua: data.rua,
+      numero: data.numero,
+      bairro: data.bairro,
+      cidade: data.cidade,
+
+      telefone: data.telefone ?? null,
+      email: data.email ?? null,
+      fotoUrl: data.fotoUrl ?? null,
+
+    },
+    senhaPlano: data.senha,
+    prefixoMatricula: data.prefixoMatricula ?? 'INF',
+  });
+
+  return reply.status(201).send({
+    aluno: {
+      id: aluno.id,
+      nome: aluno.nome,
+      cpfAluno: aluno.cpfAluno,
+      matricula: aluno.matricula,  
+      email: aluno.email,
+    },
+    message: 'Aluno criado com sucesso.',
+  });
 }

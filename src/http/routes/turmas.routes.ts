@@ -10,6 +10,7 @@ import { deleteTurmaController } from '../controllers/turma/delete-turma.control
 import { addHorarioController } from '../controllers/turma/add-horario.controller.js';
 import { listHorariosController } from '../controllers/turma/list-horarios.controller.js';
 import { removeHorarioController } from '../controllers/turma/remove-horario.controller.js';
+import { getTurmaCursoController } from '../controllers/turma/get-turma-curso.controller.js';
 
 export async function turmasRoutes(app: FastifyInstance) {
   app.addHook('onRequest', ensureAuth);
@@ -17,6 +18,7 @@ export async function turmasRoutes(app: FastifyInstance) {
   app.post('/turmas', createTurmaController);
   app.get('/turmas', listTurmasController);
   app.get('/turmas/:id', getTurmaController);
+  app.get('/turmas/curso/:cursoId', getTurmaCursoController);
   app.patch('/turmas/:id', updateTurmaController);
   app.delete('/turmas/:id', deleteTurmaController);
 
