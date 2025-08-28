@@ -22,9 +22,8 @@ export async function createAlunoController(req: FastifyRequest, reply: FastifyR
     email: z.string().email().optional(),
     fotoUrl: z.string().url().optional(),
 
-    // NOVOS CAMPOS
     senha: z.string().min(6),
-    prefixoMatricula: z.string().min(2).max(6).optional(), // ex.: 'INF' ou código da unidade
+    prefixoMatricula: z.string().min(2).max(6).optional(), 
   });
 
   const data = bodySchema.parse(req.body);
