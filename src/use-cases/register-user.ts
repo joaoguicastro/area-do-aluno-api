@@ -21,4 +21,5 @@ export class RegisterUserUseCase {
     const user = await this.usersRepo.create({ nome, email, senhaHash, role });
     return { user };
   }
+
 }

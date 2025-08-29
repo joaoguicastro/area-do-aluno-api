@@ -25,4 +25,6 @@ export async function registerController(req: FastifyRequest, reply: FastifyRepl
     role: user.role,
     createdAt: user.createdAt,
   });
+
+  
 }
