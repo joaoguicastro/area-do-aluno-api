@@ -18,7 +18,8 @@ export async function listInformativosAlunoController(req: FastifyRequest, reply
   const alunoId: string = user.sub ?? user.alunoId;
 
   const useCase = new ListInformativosDoAlunoUseCase(new PrismaInformativosRepository());
-  const result = await useCase.execute(alunoId, { q, page, perPage });
+  const params: { page: number; perPage: number; q?: string } = { page, perPage, ...(q ? { q } : {}) };
+  const result = await useCase.execute(alunoId, params);
 
   return reply.send(result);
 }

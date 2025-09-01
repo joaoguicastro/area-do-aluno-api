@@ -17,7 +17,8 @@ export async function listInformativosAdminController(req: FastifyRequest, reply
   }
 
   const useCase = new ListInformativosAdminUseCase(new PrismaInformativosRepository());
-  const result = await useCase.execute({ q, page, perPage });
+  const params: { page: number; perPage: number; q?: string } = { page, perPage, ...(q ? { q } : {}) };
+  const result = await useCase.execute(params);
 
   return reply.send(result);
 }

@@ -1,3 +1,4 @@
+// src/repositories/prisma/prisma-matriculas-repository.ts
 import { prisma } from '../../core/prisma.js';
 import type {
   MatriculasRepository,
@@ -5,7 +6,6 @@ import type {
   CreateMatriculaInput,
   UpdateMatriculaInput,
   ListMatriculasParams,
-  MatriculaStatus,
 } from '../matriculas-repository.js';
 import type { Prisma } from '@prisma/client';
 
@@ -34,7 +34,7 @@ export class PrismaMatriculasRepository implements MatriculasRepository {
     const where: Prisma.MatriculaWhereInput = {};
     if (alunoId) where.alunoId = alunoId;
     if (cursoId) where.cursoId = cursoId;
-    if (turmaId) where.turmaId = turmaId;
+    if (turmaId) where.turmaId = turmaId; // ok se você tem o scalar turmaId no schema
     if (status) where.status = status as any;
 
     const [rows, total] = await Promise.all([
@@ -52,7 +52,15 @@ export class PrismaMatriculasRepository implements MatriculasRepository {
 
   async update(id: string, data: UpdateMatriculaInput): Promise<Matricula> {
     const updateData: Prisma.MatriculaUpdateInput = {};
-    if (data.turmaId !== undefined) updateData.turmaId = data.turmaId;
+
+    // Atualiza a relação 'turma' corretamente (connect/disconnect)
+    if (data.turmaId !== undefined) {
+      updateData.turma =
+        data.turmaId === null
+          ? { disconnect: true }
+          : { connect: { id: data.turmaId } };
+    }
+
     if (data.status !== undefined) updateData.status = data.status as any;
     if (data.dataFim !== undefined) updateData.dataFim = data.dataFim;
 
