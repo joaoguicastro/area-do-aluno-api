@@ -12,7 +12,7 @@ export async function addVideoAulaController(req: FastifyRequest, reply: Fastify
     urlVideo: z.string().url(),
     ordem: z.coerce.number().int().positive().optional(),
     duracaoMin: z.coerce.number().int().positive().optional(),
-    moduloId: z.string().min(1).optional(),
+    moduloId: z.string().min(1).optional().nullable(),
   });
 
   const { cursoId } = paramsSchema.parse(req.params);

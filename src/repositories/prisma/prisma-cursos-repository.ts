@@ -113,6 +113,7 @@ export class PrismaCursosRepository implements CursosRepository {
   private mapVideoAula = (r: any): VideoAula => ({
     id: r.id,
     cursoId: r.cursoId,
+    moduloId: r.moduloId,
     titulo: r.titulo,
     descricao: r.descricao,
     urlVideo: r.urlVideo,

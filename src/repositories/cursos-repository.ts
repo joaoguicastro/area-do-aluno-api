@@ -12,6 +12,7 @@ export interface Curso {
 export interface VideoAula {
   id: string;
   cursoId: string;
+  moduloId?: string | null;
   titulo: string;
   descricao?: string | null;
   urlVideo: string;
