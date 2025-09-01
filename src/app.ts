@@ -21,8 +21,12 @@ import { modulosRoutes } from './http/routes/modulos.routes.js';
 
 export const app = Fastify({ logger: true });
 
+const origins = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(',').map(s => s.trim())
+  : true; // em dev pode ficar true
+
 await app.register(cors, {
-  origin: true,
+  origin: origins,
   methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
@@ -35,7 +39,10 @@ await app.register(fastifyMultipart, {
   limits: { files: 1, fileSize: 1024 * 1024 * 1024 },
 });
 
-const uploadsRoot = path.join(process.cwd(), 'uploads');
+const uploadsRoot = process.env.UPLOADS_DIR
+  ? path.resolve(process.env.UPLOADS_DIR)
+  : path.join(process.cwd(), 'uploads');
+
 fs.mkdirSync(path.join(uploadsRoot, 'videos'), { recursive: true });
 
 await app.register(fastifyStatic, {
