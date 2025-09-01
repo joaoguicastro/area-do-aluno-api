@@ -38,6 +38,7 @@ export interface CreateVideoAulaInput {
   urlVideo: string;
   ordem?: number | null;
   duracaoMin?: number | null;
+  moduloId?: string | null;
 }
 
 export interface CursosRepository {

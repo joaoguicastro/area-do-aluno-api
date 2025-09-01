@@ -16,6 +16,8 @@ import { exerciciosRoutes } from './http/routes/exercicios.routes.js';
 import { provasRoutes } from './http/routes/provas.routes.js';
 import { uploadRoutes } from './http/routes/upload.routes.js';
 import { progressoRoutes } from './http/routes/progresso.routes.js';
+import { informativosRoutes } from './http/routes/informativos.routes.js';
+import { modulosRoutes } from './http/routes/modulos.routes.js';
 
 export const app = Fastify({ logger: true });
 
@@ -54,5 +56,7 @@ app.register(provasRoutes);
 app.register(exerciciosRoutes);
 app.register(uploadRoutes);
 app.register(progressoRoutes);
+app.register(informativosRoutes);
+app.register(modulosRoutes);
 
 app.setErrorHandler(errorHandler);

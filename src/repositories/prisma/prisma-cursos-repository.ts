@@ -83,6 +83,7 @@ export class PrismaCursosRepository implements CursosRepository {
         urlVideo: data.urlVideo,
         ordem: data.ordem ?? null,
         duracaoMin: data.duracaoMin ?? null,
+        moduloId: data.moduloId ?? null,
       },
     });
     return this.mapVideoAula(r);

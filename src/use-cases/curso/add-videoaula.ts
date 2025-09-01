@@ -20,5 +20,7 @@ export class AddVideoAulaUseCase {
 
     const video = await this.repo.addVideoAula(cursoId, input);
     return { video };
+
+    
   }
 }

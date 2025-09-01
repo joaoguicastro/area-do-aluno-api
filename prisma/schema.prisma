@@ -55,7 +55,22 @@ model Curso {
 
   VideoAulaProgresso VideoAulaProgresso[]
 
-  informativo informativo[]
+  Informativo Informativo[]
+
+  Modulo Modulo[]
+}
+
+model Modulo {
+  id String @id @default(cuid())
+  cursoId String
+  nome String
+  ordem Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  curso Curso @relation(fields: [cursoId], references: [id], onDelete: Cascade)
+
+  VideoAula VideoAula[]
 }
 
 model VideoAula {
@@ -67,8 +82,11 @@ model VideoAula {
   ordem      Int?
   duracaoMin Int?
   createdAt  DateTime @default(now())
+  moduloId String?
 
   curso Curso @relation(fields: [cursoId], references: [id], onDelete: Cascade)
+
+  modulo Modulo? @relation(fields: [moduloId], references: [id], onDelete: Cascade)
 
   VideoAulaProgresso VideoAulaProgresso[]
 }
@@ -81,12 +99,12 @@ model Turma {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  curso     Curso          @relation(fields: [cursoId], references: [id], onDelete: Cascade)
-  horarios  TurmaHorario[]
-  Matricula Matricula[]
+  curso       Curso          @relation(fields: [cursoId], references: [id], onDelete: Cascade)
+  horarios    TurmaHorario[]
+  Matricula   Matricula[]
+  Informativo Informativo[]
 
   @@index([cursoId])
-  informativo informativo[]
 }
 
 model TurmaHorario {
@@ -140,8 +158,6 @@ model Aluno {
   acesso AlunoAcesso?
 
   VideoAulaProgresso VideoAulaProgresso[]
-
-  informativo informativo[]
 }
 
 model AlunoAcesso {
@@ -315,16 +331,22 @@ model VideoAulaProgresso {
   @@index([alunoId, cursoId])
 }
 
-model informativo{
-  id String @id @default(cuid())
-  mensagem String
-  alunoId String
-  cursoId String
-  turmaId String
+model Informativo {
+  id        String  @id @default(cuid())
+  titulo    String
+  conteudo  String
+  publicado Boolean @default(true)
+
+  cursoId String?
+  turmaId String?
+
+  curso Curso? @relation(fields: [cursoId], references: [id], onDelete: Cascade)
+  turma Turma? @relation(fields: [turmaId], references: [id], onDelete: Cascade)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  aluno     Aluno     @relation(fields: [alunoId], references: [id], onDelete: Cascade)
-  curso     Curso     @relation(fields: [cursoId], references: [id], onDelete: Cascade)
-  turma     Turma     @relation(fields: [turmaId], references: [id], onDelete: Cascade)
+  @@index([cursoId])
+  @@index([turmaId])
+  @@index([createdAt])
 }

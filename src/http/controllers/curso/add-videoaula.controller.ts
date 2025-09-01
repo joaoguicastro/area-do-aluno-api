@@ -12,6 +12,7 @@ export async function addVideoAulaController(req: FastifyRequest, reply: Fastify
     urlVideo: z.string().url(),
     ordem: z.coerce.number().int().positive().optional(),
     duracaoMin: z.coerce.number().int().positive().optional(),
+    moduloId: z.string().min(1).optional(),
   });
 
   const { cursoId } = paramsSchema.parse(req.params);
@@ -23,6 +24,7 @@ export async function addVideoAulaController(req: FastifyRequest, reply: Fastify
     descricao: data.descricao ?? null,
     ordem: data.ordem ?? null,
     duracaoMin: data.duracaoMin ?? null,
+    moduloId: data.moduloId ?? null,
   };
 
   const repo = new PrismaCursosRepository();
