@@ -4,6 +4,13 @@ import { PrismaCursosRepository } from '../../../repositories/prisma/prisma-curs
 import { AddVideoAulaUseCase } from '../../../use-cases/curso/add-videoaula.js';
 import type { CreateVideoAulaInput } from '../../../repositories/cursos-repository.js';
 
+function parseDateLocalISO(dateStr?: string | null) {
+  if (!dateStr) return null;
+  // Espera 'YYYY-MM-DD' do front (input type="date")
+  // Garante 00:00 no fuso de Fortaleza (-03:00)
+  return new Date(`${dateStr}T00:00:00-03:00`);
+}
+
 export async function addVideoAulaController(req: FastifyRequest, reply: FastifyReply) {
   const paramsSchema = z.object({ cursoId: z.string().min(1) });
   const bodySchema = z.object({
@@ -12,7 +19,8 @@ export async function addVideoAulaController(req: FastifyRequest, reply: Fastify
     urlVideo: z.string().url(),
     ordem: z.coerce.number().int().positive().optional(),
     duracaoMin: z.coerce.number().int().positive().optional(),
-    moduloId: z.string().min(1).optional().nullable(),
+    moduloId: z.string().min(1).optional(),
+    liberarEm: z.string().optional()
   });
 
   const { cursoId } = paramsSchema.parse(req.params);
@@ -25,6 +33,10 @@ export async function addVideoAulaController(req: FastifyRequest, reply: Fastify
     ordem: data.ordem ?? null,
     duracaoMin: data.duracaoMin ?? null,
     moduloId: data.moduloId ?? null,
+    liberarEm: data.liberarEm ? new Date(
+      data.liberarEm.length === 10 ? `${data.liberarEm}T00:00:00` : data.liberarEm
+    ) : null, // <--- converter com T00:00:00 p/ evitar "um dia a menos"
+
   };
 
   const repo = new PrismaCursosRepository();

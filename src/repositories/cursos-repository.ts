@@ -19,6 +19,7 @@ export interface VideoAula {
   ordem?: number | null;
   duracaoMin?: number | null;
   createdAt: Date;
+  liberarEm?: Date | null;
 }
 
 export interface CreateCursoInput {
@@ -40,6 +41,7 @@ export interface CreateVideoAulaInput {
   ordem?: number | null;
   duracaoMin?: number | null;
   moduloId?: string | null;
+  liberarEm?: Date | null;
 }
 
 export interface CursosRepository {
@@ -52,5 +54,6 @@ export interface CursosRepository {
 
   addVideoAula(cursoId: string, data: CreateVideoAulaInput): Promise<VideoAula>;
   listVideoAulas(cursoId: string): Promise<VideoAula[]>;
+  listVideoAulasLiberadas(cursoId: string, now: Date): Promise<VideoAula[]>; 
   removeVideoAula(videoAulaId: string): Promise<void>;
 }

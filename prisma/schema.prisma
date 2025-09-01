@@ -81,6 +81,7 @@ model VideoAula {
   urlVideo   String
   ordem      Int?
   duracaoMin Int?
+  liberarEm  DateTime?
   createdAt  DateTime @default(now())
   moduloId String?
 

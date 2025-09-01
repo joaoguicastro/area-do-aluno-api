@@ -84,6 +84,7 @@ export class PrismaCursosRepository implements CursosRepository {
         ordem: data.ordem ?? null,
         duracaoMin: data.duracaoMin ?? null,
         moduloId: data.moduloId ?? null,
+        liberarEm: data.liberarEm ?? null,
       },
     });
     return this.mapVideoAula(r);
@@ -96,6 +97,20 @@ export class PrismaCursosRepository implements CursosRepository {
     });
     return rows.map(this.mapVideoAula);
   }
+  async listVideoAulasLiberadas(cursoId: string, now: Date): Promise<VideoAula[]> {
+    const rows = await prisma.videoAula.findMany({
+      where: {
+        cursoId,
+        OR: [
+          { liberarEm: null },
+          { liberarEm: { lte: now } },           
+        ],
+      },
+      orderBy: [{ ordem: 'asc' }, { createdAt: 'asc' }],
+    });
+    return rows.map(this.mapVideoAula);
+  }
+
 
   async removeVideoAula(videoAulaId: string): Promise<void> {
     await prisma.videoAula.delete({ where: { id: videoAulaId } });
@@ -120,5 +135,6 @@ export class PrismaCursosRepository implements CursosRepository {
     ordem: r.ordem,
     duracaoMin: r.duracaoMin,
     createdAt: r.createdAt,
+    liberarEm: r.liberarEm,
   });
 }

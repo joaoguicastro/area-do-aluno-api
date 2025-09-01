@@ -10,6 +10,7 @@ import { deleteCursoController } from '../controllers/curso/delete-curso.control
 import { addVideoAulaController } from '../controllers/curso/add-videoaula.controller.js';
 import { listVideoAulasController } from '../controllers/curso/list-videoaulas.controller.js';
 import { removeVideoAulaController } from '../controllers/curso/remove-videoaula.controller.js';
+import { listVideoAulasAlunoController } from '../controllers/curso/list-videoaulas-aluno.controller.js';
 
 export async function cursosRoutes(app: FastifyInstance) {
   app.addHook('onRequest', ensureAuth);
@@ -23,4 +24,5 @@ export async function cursosRoutes(app: FastifyInstance) {
   app.post('/cursos/:cursoId/videoaulas', addVideoAulaController);
   app.get('/cursos/:cursoId/videoaulas', listVideoAulasController);
   app.delete('/cursos/:cursoId/videoaulas/:videoAulaId', removeVideoAulaController);
+  app.get('/cursos/:cursoId/aluno/videoaulas', listVideoAulasAlunoController);
 }
