@@ -1,14 +1,17 @@
-import type { CursosRepository, CreateCursoInput } from '../../repositories/cursos-repository.js';
-import { AppError } from '../../http/errors/app-error.js';
+import type { CursosRepository, CreateCursoInput, CreateFinanceiroForCursoInput, FinanceiroDTO, Curso } from '../../repositories/cursos-repository.js'
 
 export class CreateCursoUseCase {
-  constructor(private repo: CursosRepository) {}
+  constructor(private cursosRepo: CursosRepository) {}
 
-  async execute(input: CreateCursoInput) {
-    const exists = await this.repo.findByName(input.nome);
-    if (exists) throw new AppError('Curso já existe com esse nome', 409);
+  async execute(input: CreateCursoInput & { financeiro?: CreateFinanceiroForCursoInput }):
+    Promise<{ curso: Curso; financeiro?: FinanceiroDTO }> {
 
-    const curso = await this.repo.create(input);
+    if (input.financeiro) {
+      const { financeiro, ...cursoData } = input as Required<typeof input>;
+      return this.cursosRepo.createWithFinanceiro(cursoData, financeiro);
+    }
+
+    const curso = await this.cursosRepo.create(input);
     return { curso };
   }
 }

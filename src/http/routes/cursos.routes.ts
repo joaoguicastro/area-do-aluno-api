@@ -22,7 +22,7 @@ export async function cursosRoutes(app: FastifyInstance) {
   app.delete('/cursos/:id', deleteCursoController);
 
   app.post('/cursos/:cursoId/videoaulas', addVideoAulaController);
-  app.get('/cursos/:cursoId/videoaulas', listVideoAulasController);
+  app.get('/cursos/:cursoId/videoaulas',listVideoAulasController);
   app.delete('/cursos/:cursoId/videoaulas/:videoAulaId', removeVideoAulaController);
-  app.get('/cursos/:cursoId/aluno/videoaulas', listVideoAulasAlunoController);
+  app.get('/cursos/:cursoId/aluno/videoaulas',listVideoAulasAlunoController);
 }

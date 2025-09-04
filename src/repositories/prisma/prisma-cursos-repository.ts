@@ -7,6 +7,8 @@ import type {
   Curso,
   CreateVideoAulaInput,
   VideoAula,
+  FinanceiroDTO,
+  CreateFinanceiroForCursoInput,
 } from '../cursos-repository.js';
 
 export class PrismaCursosRepository implements CursosRepository {
@@ -137,4 +139,57 @@ export class PrismaCursosRepository implements CursosRepository {
     createdAt: r.createdAt,
     liberarEm: r.liberarEm,
   });
+  async createWithFinanceiro(
+    cursoIn: CreateCursoInput,
+    finIn: CreateFinanceiroForCursoInput
+  ): Promise<{ curso: Curso; financeiro: FinanceiroDTO }> {
+    const result = await prisma.$transaction(async (tx) => {
+      const c = await tx.curso.create({
+        data: {
+          nome: cursoIn.nome,
+          modality: cursoIn.modality as any,
+          duracaoHoras: cursoIn.duracaoHoras ?? null,
+        },
+      });
+
+      const f = await tx.financeiro.upsert({
+        where: { cursoId: c.id }, // cursoId é unique -> 1:1
+        update: {
+          nome: finIn.nome,
+          valorTotal: finIn.valorTotal as any,
+          numeroParcelas: finIn.numeroParcelas,
+          diaVencimento: finIn.diaVencimento ?? null,
+          jurosAoMes: finIn.jurosAoMes as any,
+          multaPercent: finIn.multaPercent as any,
+        },
+        create: {
+          cursoId: c.id,
+          nome: finIn.nome,
+          valorTotal: finIn.valorTotal as any,
+          numeroParcelas: finIn.numeroParcelas,
+          diaVencimento: finIn.diaVencimento ?? null,
+          jurosAoMes: finIn.jurosAoMes as any,
+          multaPercent: finIn.multaPercent as any,
+        },
+      });
+
+      return { c, f };
+    });
+
+    const curso: Curso = this.mapCurso(result.c);
+    const financeiro: FinanceiroDTO = {
+      id: result.f.id,
+      cursoId: result.f.cursoId,
+      nome: result.f.nome,
+      valorTotal: Number(result.f.valorTotal),
+      numeroParcelas: result.f.numeroParcelas,
+      diaVencimento: result.f.diaVencimento,
+      jurosAoMes: result.f.jurosAoMes ? Number(result.f.jurosAoMes) : null,
+      multaPercent: result.f.multaPercent ? Number(result.f.multaPercent) : null,
+      createdAt: result.f.createdAt,
+      updatedAt: result.f.updatedAt,
+    };
+
+    return { curso, financeiro };
+  }
 }

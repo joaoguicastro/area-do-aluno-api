@@ -5,7 +5,7 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 
@@ -59,13 +59,15 @@ model Curso {
   Informativo Informativo[]
 
   Modulo Modulo[]
+
+  Financeiro Financeiro?
 }
 
 model Modulo {
-  id String @id @default(cuid())
-  cursoId String
-  nome String
-  ordem Int?
+  id        String   @id @default(cuid())
+  cursoId   String
+  nome      String
+  ordem     Int?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -75,7 +77,7 @@ model Modulo {
 }
 
 model VideoAula {
-  id         String   @id @default(cuid())
+  id         String    @id @default(cuid())
   cursoId    String
   titulo     String
   descricao  String?
@@ -83,8 +85,8 @@ model VideoAula {
   ordem      Int?
   duracaoMin Int?
   liberarEm  DateTime?
-  createdAt  DateTime @default(now())
-  moduloId String?
+  createdAt  DateTime  @default(now())
+  moduloId   String?
 
   curso Curso @relation(fields: [cursoId], references: [id], onDelete: Cascade)
 
@@ -174,17 +176,21 @@ model AlunoAcesso {
 }
 
 model Matricula {
-  id         String          @id @default(cuid())
-  alunoId    String
-  cursoId    String
-  turmaId    String?
-  status     MatriculaStatus @default(ATIVA)
-  dataInicio DateTime        @default(now())
-  dataFim    DateTime?
+  id           String          @id @default(cuid())
+  alunoId      String
+  cursoId      String
+  turmaId      String?
+  financeiroId String?
+  status       MatriculaStatus @default(ATIVA)
+  dataInicio   DateTime        @default(now())
+  dataFim      DateTime?
 
-  aluno Aluno  @relation(fields: [alunoId], references: [id], onDelete: Cascade)
-  curso Curso  @relation(fields: [cursoId], references: [id], onDelete: Cascade)
-  turma Turma? @relation(fields: [turmaId], references: [id], onDelete: Cascade)
+  aluno      Aluno       @relation(fields: [alunoId], references: [id], onDelete: Cascade)
+  curso      Curso       @relation(fields: [cursoId], references: [id], onDelete: Cascade)
+  turma      Turma?      @relation(fields: [turmaId], references: [id], onDelete: Cascade)
+  financeiro Financeiro? @relation(fields: [financeiroId], references: [id], onDelete: Cascade)
+
+  Parcela Parcela[]
 
   @@index([alunoId])
   @@index([cursoId])
@@ -351,4 +357,58 @@ model Informativo {
   @@index([cursoId])
   @@index([turmaId])
   @@index([createdAt])
+}
+
+enum StatusParcela {
+  ABERTA
+  PAGA
+  ESTORNADA
+}
+
+enum FormaPagamento {
+  DINHEIRO
+  PIX
+  CARTAO_CREDITO
+  BOLETO
+}
+
+model Financeiro {
+  id             String   @id @default(cuid())
+  cursoId        String   @unique
+  curso          Curso    @relation(fields: [cursoId], references: [id], onDelete: Cascade)
+  nome           String
+  valorTotal     Decimal  @db.Decimal(10, 2)
+  numeroParcelas Int
+  diaVencimento  Int?
+  jurosAoMes     Decimal? @db.Decimal(5, 2)
+  multaPercent   Decimal? @db.Decimal(5, 2)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  matriculas Matricula[]
+}
+
+model Parcela {
+  id             String          @id @default(cuid())
+  matriculaId    String
+  matricula      Matricula       @relation(fields: [matriculaId], references: [id], onDelete: Cascade)
+  numero         Int
+  valor          Decimal         @db.Decimal(10, 2)
+  vencimento     DateTime
+  status         StatusParcela   @default(ABERTA)
+  formaPagamento FormaPagamento?
+  pagoEm         DateTime?
+  valorPago      Decimal?        @db.Decimal(10, 2)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([matriculaId, numero])
+  @@index([vencimento])
+}
+
+model ConfiguracaoSystema{
+  id                  String   @id @default("singleton")
+  diasAtrasoBloqueio  Int      @default(0)
+  updatedAt           DateTime @updatedAt
 }

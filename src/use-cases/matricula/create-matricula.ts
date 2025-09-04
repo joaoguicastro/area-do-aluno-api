@@ -30,7 +30,7 @@ export class CreateMatriculaUseCase {
     const active = await this.matriculasRepo.findActiveByAlunoAndCurso(input.alunoId, input.cursoId);
     if (active) throw new AppError('Já existe matrícula ATIVA para este aluno neste curso', 409);
 
-    const matricula = await this.matriculasRepo.create({
+    const matricula = await this.matriculasRepo.createWithParcelasFromCursoFinanceiro({
       alunoId: input.alunoId,
       cursoId: input.cursoId,
       turmaId: input.turmaId ?? null,
@@ -38,7 +38,6 @@ export class CreateMatriculaUseCase {
       dataInicio: input.dataInicio ?? new Date(),
       dataFim: input.dataFim ?? null,
     });
-
     return { matricula };
   }
 }

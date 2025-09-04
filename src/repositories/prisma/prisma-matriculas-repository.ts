@@ -88,4 +88,67 @@ export class PrismaMatriculasRepository implements MatriculasRepository {
     dataInicio: r.dataInicio,
     dataFim: r.dataFim,
   });
+
+  async createWithParcelasFromCursoFinanceiro(data: CreateMatriculaInput): Promise<Matricula> {
+    const result = await prisma.$transaction(async (tx) => {
+      const fin = await tx.financeiro.findUnique({
+        where: { cursoId: data.cursoId },
+      });
+      if (!fin) {
+        throw new Error('Financeiro do curso não encontrado');
+      }
+
+      const m = await tx.matricula.create({
+        data: {
+          alunoId: data.alunoId,
+          cursoId: data.cursoId,
+          turmaId: data.turmaId ?? null,
+          status: (data.status ?? 'ATIVA') as any,
+          dataInicio: data.dataInicio ?? new Date(),
+          dataFim: data.dataFim ?? null,
+          financeiroId: fin.id,
+        },
+      });
+
+      const totalCents = Math.round(Number(fin.valorTotal) * 100);
+      const n = fin.numeroParcelas;
+      const base = Math.floor(totalCents / n);
+      const resto = totalCents - base * n;
+
+      const start = data.dataInicio ? new Date(data.dataInicio) : new Date();
+      const dia = fin.diaVencimento ?? start.getDate();
+
+      function addMonthsClamp(date: Date, months: number, day: number) {
+        const d = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+        const y = d.getUTCFullYear();
+        const mth = d.getUTCMonth() + months;
+        const lastDay = new Date(Date.UTC(y, mth + 1, 0)).getUTCDate();
+        const finalDay = Math.min(day, lastDay);
+        return new Date(Date.UTC(y, mth, finalDay, 3, 0, 0)); 
+      }
+
+      const hoje = start;
+      const diaHoje = hoje.getDate();
+      const monthShift0 = diaHoje <= dia ? 0 : 1;
+
+      const itens = Array.from({ length: n }).map((_, i) => {
+        const numero = i + 1;
+        const cents = base + (i === n - 1 ? resto : 0);
+        const vencimento = addMonthsClamp(hoje, monthShift0 + i, dia);
+        return {
+          matriculaId: m.id,
+          numero,
+          valor: (cents / 100).toFixed(2), 
+          vencimento,
+        };
+      });
+
+      await tx.parcela.createMany({ data: itens, skipDuplicates: true });
+
+      return m;
+    });
+
+    return this.map(result);
+  }
+
 }

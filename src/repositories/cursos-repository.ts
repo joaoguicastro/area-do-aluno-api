@@ -9,6 +9,27 @@ export interface Curso {
   updatedAt: Date;
 }
 
+export interface CreateFinanceiroForCursoInput {
+  nome: string;
+  valorTotal: number | string;       
+  numeroParcelas: number;
+  diaVencimento?: number | null;     
+  jurosAoMes?: number | string | null;
+  multaPercent?: number | string | null;
+}
+
+export interface FinanceiroDTO {
+  id: string;
+  cursoId: string;
+  nome: string;
+  valorTotal: number;
+  numeroParcelas: number;
+  diaVencimento?: number | null;
+  jurosAoMes?: number | null;
+  multaPercent?: number | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
 export interface VideoAula {
   id: string;
   cursoId: string;
@@ -56,4 +77,9 @@ export interface CursosRepository {
   listVideoAulas(cursoId: string): Promise<VideoAula[]>;
   listVideoAulasLiberadas(cursoId: string, now: Date): Promise<VideoAula[]>; 
   removeVideoAula(videoAulaId: string): Promise<void>;
+  createWithFinanceiro(
+    curso: CreateCursoInput,
+    financeiro: CreateFinanceiroForCursoInput
+  ): Promise<{ curso: Curso; financeiro: FinanceiroDTO }>;
+
 }

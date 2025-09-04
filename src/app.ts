@@ -18,6 +18,12 @@ import { uploadRoutes } from './http/routes/upload.routes.js';
 import { progressoRoutes } from './http/routes/progresso.routes.js';
 import { informativosRoutes } from './http/routes/informativos.routes.js';
 import { modulosRoutes } from './http/routes/modulos.routes.js';
+import { financeiroRoutes } from './http/routes/financeiro.routes.js';
+import { parcelasRoutes } from './http/routes/parcelas.routes.js';
+import { adminConfigRoutes } from './http/routes/admin.config.routes.js';
+import { meFinanceiroRoutes } from './http/routes/financeiro.me.routes.js';
+import { debugRoutes } from './http/routes/debug.routes.js';
+
 
 export const app = Fastify({ logger: true });
 
@@ -34,6 +40,22 @@ await app.register(cors, {
 });
 
 await app.register(jwt, { secret: env.JWT_SECRET });
+
+app.decorate('authenticate', async function (req, reply) {
+  try {
+    await req.jwtVerify();
+  } catch (err: any) {
+    req.log.error(
+      { err, authHeader: req.headers.authorization },
+      'JWT verify failed'
+    );
+    return reply.code(401).send({
+      message: 'Aluno não autenticado',
+      reason: err?.message ?? 'verify_failed',
+    });
+  }
+});
+
 
 await app.register(fastifyMultipart, {
   limits: { files: 1, fileSize: 1024 * 1024 * 1024 },
@@ -54,6 +76,8 @@ app.get('/', async () => {
   return { ok: true, at: new Date().toISOString(), env: env.NODE_ENV };
 });
 
+await app.register(debugRoutes);
+
 app.register(authRoutes);
 app.register(cursosRoutes);
 app.register(turmasRoutes);
@@ -65,5 +89,9 @@ app.register(uploadRoutes);
 app.register(progressoRoutes);
 app.register(informativosRoutes);
 app.register(modulosRoutes);
+app.register(financeiroRoutes);
+app.register(parcelasRoutes);
+app.register(adminConfigRoutes);
+app.register(meFinanceiroRoutes);
 
 app.setErrorHandler(errorHandler);

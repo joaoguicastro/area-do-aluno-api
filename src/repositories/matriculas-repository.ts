@@ -42,4 +42,6 @@ export interface MatriculasRepository {
   delete(id: string): Promise<void>;
 
   findActiveByAlunoAndCurso(alunoId: string, cursoId: string): Promise<Matricula | null>;
+  createWithParcelasFromCursoFinanceiro(data: CreateMatriculaInput): Promise<Matricula>;
+
 }
