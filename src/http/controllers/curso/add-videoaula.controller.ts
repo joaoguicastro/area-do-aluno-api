@@ -35,7 +35,7 @@ export async function addVideoAulaController(req: FastifyRequest, reply: Fastify
     moduloId: data.moduloId ?? null,
     liberarEm: data.liberarEm ? new Date(
       data.liberarEm.length === 10 ? `${data.liberarEm}T00:00:00` : data.liberarEm
-    ) : null, // <--- converter com T00:00:00 p/ evitar "um dia a menos"
+    ) : null,
 
   };
 

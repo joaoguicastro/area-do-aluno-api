@@ -25,7 +25,10 @@ import { meFinanceiroRoutes } from './http/routes/financeiro.me.routes.js';
 import { debugRoutes } from './http/routes/debug.routes.js';
 
 
-export const app = Fastify({ logger: true });
+export const app = Fastify({ 
+  logger: true, 
+  bodyLimit: 1024 * 1024 * 1024 
+});
 
 const origins = process.env.CORS_ORIGIN
   ? process.env.CORS_ORIGIN.split(',').map(s => s.trim())
