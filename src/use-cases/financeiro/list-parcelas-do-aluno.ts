@@ -17,7 +17,7 @@ type ParcelaRow = {
 
 export async function listParcelasDoAluno(alunoId: string) {
   const parcelas = await prisma.parcela.findMany({
-    where: { matricula: { alunoId } }, // via relação Matricula -> Aluno
+    where: { matricula: { alunoId } },
     select: {
       id: true,
       matriculaId: true,
