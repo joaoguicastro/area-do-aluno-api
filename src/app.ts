@@ -23,6 +23,7 @@ import { parcelasRoutes } from './http/routes/parcelas.routes.js';
 import { adminConfigRoutes } from './http/routes/admin.config.routes.js';
 import { meFinanceiroRoutes } from './http/routes/financeiro.me.routes.js';
 import { debugRoutes } from './http/routes/debug.routes.js';
+import { apostilaRoutes } from './http/routes/apostila.routes.js';
 
 
 export const app = Fastify({ 
@@ -96,5 +97,6 @@ app.register(financeiroRoutes);
 app.register(parcelasRoutes);
 app.register(adminConfigRoutes);
 app.register(meFinanceiroRoutes);
+app.register(apostilaRoutes);
 
 app.setErrorHandler(errorHandler);
