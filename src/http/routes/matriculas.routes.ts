@@ -6,11 +6,13 @@ import { listMatriculasController } from '../controllers/matricula/list-matricul
 import { getMatriculaController } from '../controllers/matricula/get-matricula.controller.js';
 import { updateMatriculaController } from '../controllers/matricula/update-matricula.controller.js';
 import { deleteMatriculaController } from '../controllers/matricula/delete-matricula.controller.js';
+import { createMatriculasBulkController } from '../controllers/matricula/bulk-create-matriculas.controller.js';
 
 export async function matriculasRoutes(app: FastifyInstance) {
   app.addHook('onRequest', ensureAuth);
 
   app.post('/matriculas', createMatriculaController);
+  app.post('/matriculas/bulk', createMatriculasBulkController);
   app.get('/matriculas', listMatriculasController);
   app.get('/matriculas/:id', getMatriculaController);
   app.patch('/matriculas/:id', updateMatriculaController);
