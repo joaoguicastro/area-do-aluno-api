@@ -30,4 +30,38 @@ export async function uploadRoutes(app: FastifyInstance) {
     const url = `/uploads/videos/${name}`;
     return reply.code(201).send({ url });
   });
+
+  app.post('/uploads/file', async (req, reply) => {
+    const data = await req.file();
+    if (!data) {
+      return reply.status(400).send({ message: 'Arquivo não enviado' });
+    }
+
+    const allowed = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'image/png',
+      'image/jpeg'
+    ];
+
+    if (!allowed.includes(data.mimetype)) {
+      return reply.status(400).send({ message: 'Tipo de arquivo não suportado' });
+    }
+
+    const ext = path.extname(data.filename) || '';
+    const name = crypto.randomBytes(16).toString('hex') + ext;
+    const target = path.join(process.cwd(), 'uploads', 'files', name);
+
+    await fs.promises.mkdir(path.dirname(target), { recursive: true });
+
+    const writeStream = fs.createWriteStream(target);
+    await pipeline(data.file, writeStream);
+
+    const url = `/uploads/files/${name}`;
+    return reply.code(201).send({ url });
+  });
+
 }
